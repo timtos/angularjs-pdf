@@ -122,7 +122,15 @@
           }
         };
 
+        function clearCanvas() {
+          if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          }
+        }
+
         function renderPDF() {
+          clearCanvas();
+
           if (url && url.length) {
             PDFJS.getDocument(url, null, null, scope.onProgress).then(
                 function(_pdfDoc) {
