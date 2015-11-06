@@ -4,6 +4,8 @@
   'use strict';
 
   angular.module('pdf', []).directive('ngPdf', [ '$window', function($window) {
+    var renderTask = null;
+
     var backingScale = function(canvas) {
       var ctx = canvas.getContext('2d');
       var dpr = window.devicePixelRatio || 1;
@@ -32,7 +34,7 @@
       },
       link: function(scope, element, attrs) {
         var url = scope.pdfUrl;
-        var pdfDoc = null
+        var pdfDoc = null;
         var pageNum = (attrs.page ? attrs.page : 1);
         var scale = attrs.scale > 0 ? attrs.scale : 1;
         var canvas = (attrs.canvasid ? document.getElementById(attrs.canvasid) : document.getElementById('pdf-canvas'));
@@ -49,6 +51,10 @@
         scope.pageNum = pageNum;
 
         scope.renderPage = function(num) {
+          if (renderTask) {
+              renderTask._internalRenderTask.cancel();
+          }
+
           pdfDoc.getPage(num).then(function(page) {
             var viewport;
             var pageWidthScale;
@@ -62,7 +68,7 @@
               pageHeightScale = element[0].clientHeight / viewport.height;
               scale = Math.min(pageWidthScale, pageHeightScale);
             } else {
-              viewport = page.getViewport(scale)
+              viewport = page.getViewport(scale);
             }
 
             setCanvasDimensions(canvas, viewport.width, viewport.height);
@@ -72,10 +78,13 @@
               viewport: viewport
             };
 
-            page.render(renderContext).promise.then(function() {
-              if (typeof scope.onPageRender === 'function' ) {
-                scope.onPageRender();
-              }
+            renderTask = page.render(renderContext);
+            renderTask.promise.then(function() {
+                if (typeof scope.onPageRender === 'function') {
+                    scope.onPageRender();
+                }
+            }).catch(function (reason) {
+                console.log(reason);
             });
           });
         };
