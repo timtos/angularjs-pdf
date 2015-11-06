@@ -31,7 +31,7 @@
     return {
       restrict: 'E',
       templateUrl: function(element, attr) {
-        return attr.templateUrl ? attr.templateUrl : 'partials/viewer.html'
+        return attr.templateUrl ? attr.templateUrl : 'partials/viewer.html';
       },
       link: function(scope, element, attrs) {
         var url = scope.pdfUrl;
@@ -60,8 +60,7 @@
             var viewport;
             var pageWidthScale;
             var pageHeightScale;
-            var renderContext = {};
-            var pageRendering;
+            var renderContext;
 
             if (attrs.scale === 'page-fit' && !scale) {
               viewport = page.getViewport(1);
